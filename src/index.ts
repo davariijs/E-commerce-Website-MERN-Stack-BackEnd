@@ -25,10 +25,10 @@ mongoose.connect(mongoURI, {
 }).catch(error => console.log(error));
 
 // Routes
-app.use('/add-wishlist', wishlistRoutes);
-app.use('/cart', cartRoutes);
-app.use('/info-account', infoAccountRoutes);
-app.use('/check-out', checkOutRoutes);
+app.use('/api/add-wishlist', wishlistRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/info-account', infoAccountRoutes);
+app.use('/api/check-out', checkOutRoutes);
 
 // Root route
 app.get('/', (req: Request, res: Response) => {
