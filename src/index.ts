@@ -39,3 +39,13 @@ app.get('/', (req: Request, res: Response) => {
 app.listen(PORT, () => {
     console.log(`App is listening on port ${PORT}`);
 });
+
+
+
+
+  // "scripts": {
+  //   "test": "echo \"Error: no test specified\" && exit 1",
+  //   "start": "nodemon src/index.ts",
+  //   "dev": "ts-node src/index.ts",
+  //   "build": "tsc"
+  // },
