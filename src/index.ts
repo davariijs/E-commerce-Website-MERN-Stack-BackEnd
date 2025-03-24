@@ -26,7 +26,7 @@ mongoose.connect(mongoURI, {
 }).catch(error => console.log(error));
 
 // Routes
-app.use('/api/add-wishlist', wishlistRoutes);
+app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/info-account', infoAccountRoutes);
 app.use('/api/check-out', checkOutRoutes);
