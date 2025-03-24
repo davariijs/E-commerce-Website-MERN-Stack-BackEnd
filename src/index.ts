@@ -6,6 +6,7 @@ import wishlistRoutes from  './routes/wishlistRoutes';
 import cartRoutes from  './routes/cartRoutes';
 import infoAccountRoutes from  './routes/infoAccountRoutes';
 import checkOutRoutes from  './routes/checkOutCartRoutes';
+import authRoutes from './routes/authRoutes';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -29,6 +30,7 @@ app.use('/api/add-wishlist', wishlistRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/info-account', infoAccountRoutes);
 app.use('/api/check-out', checkOutRoutes);
+app.use('/api/auth', authRoutes);
 
 // Root route
 app.get('/', (req: Request, res: Response) => {
@@ -39,13 +41,3 @@ app.get('/', (req: Request, res: Response) => {
 app.listen(PORT, () => {
     console.log(`App is listening on port ${PORT}`);
 });
-
-
-
-
-  // "scripts": {
-  //   "test": "echo \"Error: no test specified\" && exit 1",
-  //   "start": "nodemon src/index.ts",
-  //   "dev": "ts-node src/index.ts",
-  //   "build": "tsc"
-  // },
