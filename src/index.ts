@@ -16,7 +16,14 @@ const dbName = process.env.DB_NAME;
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: [
+      'https://shoply-clothes.netlify.app',
+      'http://localhost:3000',
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }));
 
 if (!mongoURI) {
     throw new Error('MONGO_URI is not defined in the environment variables');
