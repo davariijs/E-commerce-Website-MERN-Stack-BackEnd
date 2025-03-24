@@ -17,12 +17,11 @@ const dbName = process.env.DB_NAME;
 // Middleware
 app.use(express.json());
 app.use(cors({
-    origin: [
-      'https://shoply-clothes.netlify.app',
-      'http://localhost:3000',
-    ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    origin: ['https://shoply-clothes.netlify.app', 'http://localhost:3000'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+    optionsSuccessStatus: 200
   }));
 
 if (!mongoURI) {
