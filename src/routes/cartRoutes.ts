@@ -1,45 +1,46 @@
 import express, { Request, Response } from 'express';
 import mongoose, { Model } from 'mongoose';
 import { ICartList } from '../types';
+import { authenticateJWT } from './authRoutes';
 const { CartSchema } = require('../models/Schema');
 const router = express.Router();
 
 const CartCheckList: Model<ICartList> = mongoose.model<ICartList>('cartCheckLists', CartSchema);
 
-router.post("/", async (req: Request, res: Response): Promise<void> => {
+router.post("/", authenticateJWT, async (req: Request, res: Response): Promise<void> => {
     const { uid, item } = req.body;
+
+    const user = req.body.user;
+    if (user.userId !== uid) {
+        res.status(403).json({ error: "Unauthorized: You can only add items to your own cart" });
+        return;
+    }
   
     try {
-      // Find the cart by user ID
       let cart = await CartCheckList.findOne({ uid });
   
       if (!cart) {
-        // If no cart exists for the user, create a new one
         cart = new CartCheckList({ uid, items: [] });
       }
   
-      // Check if the item already exists in the cart
       const existingItemIndex = cart.items.findIndex(
         (cartItem) =>
           cartItem.webID === item.webID && cartItem.color === item.color
       );
   
       if (existingItemIndex > -1) {
-        // If the item exists, increment its quantity
         cart.items[existingItemIndex].quantity += item.quantity || 1;
       } else {
-        // If the item doesn't exist, add it to the cart
         cart.items.push({
           title: item.title,
           image: item.image,
           price: item.price,
           color: item.color,
-          quantity: item.quantity || 1, // Default quantity to 1
-          webID: item.webID, // Use consistent naming
+          quantity: item.quantity || 1,
+          webID: item.webID, 
         });
       }
   
-      // Save the cart to the database
       await cart.save();
   
       res.status(200).json(cart);
@@ -50,15 +51,45 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
   });
   
   // GET: Retrieve cart
-  router.get('/:uid', async (req: Request, res: Response): Promise<void> => { // Change from userId to uid
-    const cart = await CartCheckList.findOne({ uid: req.params.uid });
-    res.status(200).json(cart);
+  // router.get('/:uid', authenticateJWT, async (req: Request, res: Response): Promise<void> => { // Change from userId to uid
+  //   const cart = await CartCheckList.findOne({ uid: req.params.uid });
+  //   res.status(200).json(cart);
+  // });
+
+  // GET: Retrieve cart
+  router.get('/:uid', authenticateJWT, async (req: Request, res: Response): Promise<void> => {
+    try {
+      const authenticatedUserId = req.body.user.userId;
+      if (authenticatedUserId !== req.params.uid) {
+        res.status(403).json({ 
+          error: "Unauthorized: You can only access your own cart" 
+        });
+        return;
+      }
+      const cart = await CartCheckList.findOne({ uid: req.params.uid });
+      
+      if (!cart) {
+        res.status(200).json(null); 
+        return;
+      }
+      
+      res.status(200).json(cart);
+    } catch (error) {
+      console.error("Error fetching cart:", error);
+      res.status(500).json({ error: "Failed to fetch cart" });
+    }
   });
   
   // PUT: Increase item quantity in cart
-  router.put('/increase/:uid/:itemId', async (req: Request, res: Response): Promise<void> => {
+  router.put('/increase/:uid/:itemId', authenticateJWT, async (req: Request, res: Response): Promise<void> => {
     const { uid, itemId } = req.params;
-  
+    
+
+    const user = req.body.user;
+    if (user.userId !== uid) {
+        res.status(403).json({ error: "Unauthorized: You can only update items to your own cart" });
+        return;
+    }
     try {
         const cart = await CartCheckList.findOne({ uid });
   
@@ -67,14 +98,14 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
             return;
           }
   
-        const id = new mongoose.Types.ObjectId(itemId); // Convert to ObjectId
+        const id = new mongoose.Types.ObjectId(itemId);
         const item = cart.items.find((item) => item._id.equals(id));
         if (!item) {
             res.status(404).json({ message: 'Item not found in cart' });
             return;
           }
   
-        item.quantity += 1; // Increment quantity
+        item.quantity += 1; 
         await cart.save();
   
         res.status(200).json(cart);
@@ -87,9 +118,14 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
   });
   
   // PUT: Decrease item quantity in cart
-  router.put('/decrease/:uid/:itemId', async (req: Request, res: Response): Promise<void> => {
+  router.put('/decrease/:uid/:itemId', authenticateJWT, async (req: Request, res: Response): Promise<void> => {
     const { uid, itemId } = req.params;
-  
+    
+    const user = req.body.user;
+    if (user.userId !== uid) {
+        res.status(403).json({ error: "Unauthorized: You can only update items to your own cart" });
+        return;
+    }
     try {
         const cart = await CartCheckList.findOne({ uid });
   
@@ -98,7 +134,7 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
             return;
           }
   
-        const id = new mongoose.Types.ObjectId(itemId); // Convert to ObjectId
+        const id = new mongoose.Types.ObjectId(itemId);
   
         const item = cart.items.find((item) => item._id.equals(id));
         if (!item) {
@@ -106,7 +142,6 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
             return;
           }
   
-        // Decrease quantity or remove item if quantity is 1
         if (item.quantity > 1) {
             item.quantity -= 1;
         } else {
@@ -126,13 +161,19 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
   
   
   // DELETE: Remove item from cart
-  router.delete('/:uid/:id', async (req: Request, res: Response): Promise<void> => {
+  router.delete('/:uid/:id', authenticateJWT, async (req: Request, res: Response): Promise<void> => {
     const { uid, id } = req.params;
-  
+    
+
+    const user = req.body.user;
+    if (user.userId !== uid) {
+        res.status(403).json({ error: "Unauthorized: You can only delete items from your own cart" });
+        return;
+    }
+
     try {
       console.log(`Deleting item with id: ${id} from cart of user: ${uid}`);
   
-      // Find the cart associated with the user ID
       const cart = await CartCheckList.findOne({ uid });
   
       if (!cart) {
@@ -140,8 +181,7 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
         res.status(404).json({ message: 'Cart not found' });
         return;
       }
-  
-      // Log current items for debugging
+
       console.log(`Cart items before filtering: ${JSON.stringify(cart.items)}`);
       
       if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -149,22 +189,17 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
         res.status(400).json({ message: 'Invalid item ID' });
         return;
       }
-      // Convert id from string to ObjectId
-      const itemId = new mongoose.Types.ObjectId(id); // Use 'new' here
-  
-      // Check if the item exists before filtering
-      const itemExists = cart.items.some((item) => item._id.equals(itemId)); // Use equals() for comparison
+
+      const itemId = new mongoose.Types.ObjectId(id);
+      const itemExists = cart.items.some((item) => item._id.equals(itemId));
       if (!itemExists) {
         console.log(`Item with id: ${itemId} not found in cart items.`);
         res.status(404).json({ message: 'Item not found in cart' });
         return;
 
       }
-  
-      // Filter out the item by its ObjectId
-      cart.items = cart.items.filter((item) => !item._id.equals(itemId)); // Use equals() for filtering
-  
-      // Save the updated cart
+
+      cart.items = cart.items.filter((item) => !item._id.equals(itemId));
       await cart.save();
   
       console.log(`Successfully removed item with id: ${itemId} from user: ${uid}'s cart`);
@@ -180,7 +215,7 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
   });
 
 
-  router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
+  router.delete('/:id', authenticateJWT, async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     console.log('Backend id:', id);
 
@@ -190,15 +225,20 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
     }
 
     try {
-        // Update the cart document by setting the items array to an empty array
         const updatedCart = await CartCheckList.findByIdAndUpdate(
             id,
-            { $set: { items: [] } }, // Clear the items array
-            { new: true } // Return the updated document
+            { $set: { items: [] } }, 
+            { new: true }
         );
 
         if (!updatedCart) {
             res.status(404).json({ message: 'Cart not found' });
+            return;
+        }
+
+        const user = req.body.user;
+        if (updatedCart.uid !== user.userId) {
+            res.status(403).json({ error: "Unauthorized: You can only delete items from your own cart" });
             return;
         }
 
