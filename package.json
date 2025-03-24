@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc -p netlify/functions",
     "start": "nodemon src/index.ts",
     "dev": "netlify dev",
     "deploy": "netlify deploy --prod"
