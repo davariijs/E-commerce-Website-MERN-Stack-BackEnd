@@ -53,7 +53,7 @@ router.delete("/:id", authenticateJWT, async (req: Request, res: Response): Prom
     
     try {
 
-        const item = await Wishlist.findById(id);
+        const item = await Wishlist.findByIdAndDelete(id);
         if (!item) {
             res.status(404).json({ message: 'Item not found' });
             return;
@@ -65,7 +65,7 @@ router.delete("/:id", authenticateJWT, async (req: Request, res: Response): Prom
             return;
         }
         
-        const deletedItem = await Wishlist.findByIdAndDelete(id);
+        // const deletedItem = await Wishlist.findByIdAndDelete(id);
         res.status(200).json({ message: 'Item removed from wishlist' });
     } catch (error) {
         console.error("Error removing wishlist item:", error);
