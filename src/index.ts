@@ -47,6 +47,14 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 // Start the server
-app.listen(PORT, () => {
-    console.log(`App is listening on port ${PORT}`);
-});
+// app.listen(PORT, () => {
+//     console.log(`App is listening on port ${PORT}`);
+// });
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`App is listening on port ${PORT}`);
+    });
+}
+
+
+export default app;
