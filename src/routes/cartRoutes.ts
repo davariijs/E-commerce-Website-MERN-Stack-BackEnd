@@ -49,12 +49,6 @@ router.post("/", authenticateJWT, async (req: Request, res: Response): Promise<v
       res.status(500).json({ message: "Failed to add product to cart", error });
     }
   });
-  
-  // GET: Retrieve cart
-  // router.get('/:uid', authenticateJWT, async (req: Request, res: Response): Promise<void> => { // Change from userId to uid
-  //   const cart = await CartCheckList.findOne({ uid: req.params.uid });
-  //   res.status(200).json(cart);
-  // });
 
   // GET: Retrieve cart
   router.get('/:uid', authenticateJWT, async (req: Request, res: Response): Promise<void> => {

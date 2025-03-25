@@ -76,7 +76,7 @@ router.post("/token", async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-// Example of a protected route using the JWT middleware
+
 router.get("/verify", authenticateJWT, (req: Request, res: Response): void => {
   res.status(200).json({ 
     message: "Token verified successfully", 
