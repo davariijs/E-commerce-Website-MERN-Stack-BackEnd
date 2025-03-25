@@ -6,7 +6,10 @@
     "build": "tsc && tsc -p netlify/functions",
     "start": "nodemon src/index.ts",
     "dev": "netlify dev",
-    "deploy": "netlify deploy --prod"
+    "deploy": "netlify deploy --prod",
+    "test": "jest --detectOpenHandles",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "keywords": [],
   "author": "",
@@ -25,9 +28,14 @@
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
+    "@types/jest": "^29.5.14",
     "@types/node": "^22.13.0",
+    "@types/supertest": "^6.0.3",
+    "jest": "^29.7.0",
     "netlify-cli": "^19.0.2",
     "serverless-http": "^3.2.0",
+    "supertest": "^7.1.0",
+    "ts-jest": "^29.3.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
   }
